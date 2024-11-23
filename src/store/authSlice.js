@@ -24,9 +24,17 @@
 // export const { login, logout } = authSlice.actions;
 // export default authSlice.reducer;
 import { createSlice } from '@reduxjs/toolkit';
+let parsedUser = {};
+try {
+  const userData = localStorage.getItem('user');
+  parsedUser = userData ? JSON.parse(userData) : {};
+} catch (error) {
+  console.error('Error parsing user data from localStorage:', error);
+}
+
 
 const initialState = {
-  user: JSON.parse(localStorage.getItem('user')) || null,
+  user: parsedUser,
   token: localStorage.getItem('token') || null,
   isAuthenticated: !!localStorage.getItem('token'),
 };

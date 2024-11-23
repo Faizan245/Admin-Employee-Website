@@ -43,11 +43,18 @@ function Register() {
     };
     const handleSubmit = async (e) => {
         e.preventDefault();
+    
+        // Basic validation
         if (!name || !email || !photo || !password || !gender || !status || !designation) {
-            setErrorMessage('Please fill out all fields and upload a document.');
+            setErrorMessage('Please fill out all fields and upload a valid document.');
             return;
         }
-
+    
+        if (!(photo instanceof File)) {
+            setErrorMessage('Please upload a valid image file.');
+            return;
+        }
+    
         const formData = new FormData();
         formData.append('username', name);
         formData.append('email', email);
@@ -56,36 +63,42 @@ function Register() {
         formData.append('gender', gender);
         formData.append('status', status);
         formData.append('designation', designation);
-
+    
+        console.log('FormData entries:', [...formData.entries()]);
+    
         try {
             const response = await fetch(`${api}/register`, {
                 method: 'POST',
                 body: formData,
             });
-
+    
             if (response.ok) {
                 const data = await response.json();
                 console.log('Registration successful:', data);
+    
                 setSuccessMessage('Employee registered successfully !!');
                 setErrorMessage('');
+                
+                // Reset form fields
                 setName('');
                 setEmail('');
                 setPassword('');
                 setPhoto(null);
-                setUploadMessage('');
                 setGender('');
                 setStatus('');
                 setDesignation('');
+                setUploadMessage('')
             } else {
                 const errorData = await response.json();
                 console.error('Registration failed:', errorData);
-                setErrorMessage(errorData.error || 'Registration failed');
+                setErrorMessage(errorData.message || 'Registration failed');
             }
         } catch (error) {
             console.error('Error:', error);
             setErrorMessage('An error occurred. Please try again.');
         }
     };
+    
 
 
     return (

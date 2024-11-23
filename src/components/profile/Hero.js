@@ -5,7 +5,7 @@ const Hero = () => {
     const username = useSelector((state) => state.auth.user.username);
     const email = useSelector((state) => state.auth.user.email);
     const designation = useSelector((state) => state.auth.user.designation);
-    const profile = useSelector((state) => state.auth.user.profile);
+    const profile = useSelector((state) => state.auth.user.profilePicture);
     return (
         <>
             <div className='flex justify-center pt-[150px]'>

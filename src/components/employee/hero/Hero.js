@@ -20,15 +20,16 @@ function Hero() {
     const [uploadMessage, setUploadMessage] = useState('');
     const [refreshTasks, setRefreshTasks] = useState(false);
 
-    const employeeId = useSelector((state) => state.auth.user.id)
+    const employeeId = useSelector((state) => state.auth.user.userId)
 
     useEffect(() => {
         const fetchTasks = async () => {
             try {
                 const response = await axios.get(`${api}/tasks`);
                 // Filter tasks to include only those matching the employeeId
-                const filteredTasks = response.data.filter(task => task.employeeId === employeeId);
+                const filteredTasks = response.data.tasks.filter(task => task.employeeId === employeeId);
                 setTasks(filteredTasks);
+                console.log(filteredTasks)
 
             } catch (error) {
                 console.error('Error fetching tasks:', error);
@@ -38,7 +39,7 @@ function Hero() {
         fetchTasks();
         setRefreshTasks(false)
 
-    }, [employeeId, refreshTasks]);
+    }, [employeeId, refreshTasks, api]);
 
     const filteredEmployees = tasks.filter(task =>
         task.taskId.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -72,7 +73,7 @@ function Hero() {
         setStatus(task.status);
         setNewStatus(task.status);
         setTaskId(task.id)
-        setDocuments(task.documentUrls);
+        setDocuments(Array.isArray(task.documentURLs) ? task.documentURLs : []);
     }
 
 
@@ -94,11 +95,9 @@ function Hero() {
         const formData = new FormData();
         formData.append('status', newStatus);
         formData.append('taskId', taskId);
-        if (files != null) {
-            files.forEach((document, index) => {
-                formData.append('files', document);
-            });
-        }
+        documents.forEach((document) => {
+            formData.append('files', document);
+        });
 
         try {
             const response = await axios.post(`${api}/updateTask`, formData, {
@@ -161,16 +160,20 @@ function Hero() {
                                                                 <h1><span className='font-bold'>Task Details : </span>{taskDetails}</h1>
                                                                 <h1><span className='font-bold'>Task Status : </span>{currentIndex === -1 ? status : statusStage[currentIndex]}</h1>
                                                                 <div className='flex flex-col px-[10px] h-[300px] overflow-scroll'>
-                                                                    {documents.length > 0 ? (
-                                                                        documents.map((doc, index) => (
-                                                                            <div
-                                                                                key={index}
-                                                                                onClick={() => handleDocClick(doc.url)}
-                                                                                className='cursor-pointer rounded-2xl p-[20px] bg-[#fff] border border-[#ccc] mb-[10px] inline-block'
-                                                                            >
-                                                                                {doc.name}
-                                                                            </div>
-                                                                        ))
+                                                                    {Array.isArray(documents) && documents.length > 0 ? (
+                                                                        documents.map((doc, index) => {
+                                                                            // Extract the file name from the URL
+                                                                            const fileName = doc.split('/').pop();
+                                                                            return (
+                                                                                <div
+                                                                                    key={index}
+                                                                                    onClick={() => handleDocClick(doc)} // Pass the URL directly
+                                                                                    className='cursor-pointer rounded-2xl p-[20px] bg-[#fff] border border-[#ccc] mb-[10px] inline-block'
+                                                                                >
+                                                                                    {fileName} {/* Display only the file name */}
+                                                                                </div>
+                                                                            );
+                                                                        })
                                                                     ) : (
                                                                         <p>Loading documents...</p>
                                                                     )}

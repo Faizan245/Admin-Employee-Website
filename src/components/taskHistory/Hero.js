@@ -21,14 +21,14 @@ const Hero = () => {
         const fetchTasks = async () => {
             try {
                 const response = await axios.get(`${api}/taskHistory`);
-                setTasks(response.data);
+                setTasks(response.data.taskHistory);
             } catch (error) {
                 console.error('Error fetching tasks:', error);
             }
         };
 
         fetchTasks();
-    }, []);
+    }, [api]);
 
     const handleClosetask = () => {
         setStatus('')
@@ -57,7 +57,7 @@ const Hero = () => {
         setStatus(task.status);
         setNewStatus(task.status);
         setTaskId(task.id)
-        setDocuments(task.documentUrls);
+        setDocuments(Array.isArray(task.documentURLs) ? task.documentURLs : []);
     }
 
 
@@ -79,11 +79,9 @@ const Hero = () => {
         const formData = new FormData();
         formData.append('status', newStatus);
         formData.append('taskId', taskId);
-        if (files != null) {
-            files.forEach((document, index) => {
-                formData.append('files', document);
-            });
-        }
+        documents.forEach((document) => {
+            formData.append('files', document);
+          });
 
         console.log(formData)
     };
@@ -111,7 +109,7 @@ const Hero = () => {
                                                 <h1><span className='font-bold'>Task Details : </span>{taskDetails}</h1>
                                                 <h1><span className='font-bold'>Task Status : </span>{currentIndex === -1 ? status : statusStage[currentIndex]}</h1>
                                                 <div className='flex flex-col px-[10px] h-[300px] overflow-scroll'>
-                                                    {documents.length > 0 ? (
+                                                    {Array.isArray(documents) && documents.length > 0 ? (
                                                         documents.map((doc, index) => (
                                                             <div
                                                                 key={index}

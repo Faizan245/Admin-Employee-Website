@@ -20,7 +20,7 @@ function SelectEmployee() {
         const fetchEmployees = async () => {
             try {
                 const response = await axios.get(`${api}/users`);
-                setEmployees(response.data);
+                setEmployees(response.data.users);
             } catch (error) {
                 console.error('Error fetching employees:', error);
                 setErrorMessage('Failed to fetch employees.');
@@ -28,7 +28,7 @@ function SelectEmployee() {
         };
 
         fetchEmployees();
-    }, []);
+    }, [api]);
 
     const taskStatus = useSelector((state) => state.tasks.taskStatus);
     const taskDetails = useSelector((state) => state.tasks.taskDetails);
@@ -42,7 +42,7 @@ function SelectEmployee() {
 
     const handleEmployeeSelection = (index, employee) => {
         setSelectedEmployeeIndex(index);
-        setEmployeeId(employee.id);
+        setEmployeeId(employee.userId);
         setEmployeeName(employee.username);
     };
 
@@ -60,7 +60,7 @@ function SelectEmployee() {
         
 
         try {
-            const response = await fetch('https://viable-backend.vercel.app/assigntask', {
+            const response = await fetch(`${api}/assignTask`, {
                 method: 'POST',
                 body: formData
             });

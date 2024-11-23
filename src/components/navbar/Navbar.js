@@ -8,6 +8,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import './nav.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/authSlice';
+import logo from './assets/tasklogo.png'
 
 function Navbar() {
   const [showPopup, setShowPopup] = useState(false);
@@ -48,11 +49,12 @@ function Navbar() {
     setActiveLink(location.pathname);
   }, [location.pathname]);
 
-  const linkTo = status === 'Owner' ? '/owner' : '/employee';
+  const linkTo = status === 'owner' ? '/owner' : '/employee';
 
   return (
     <>
-      <div className='w-full h-full shadow-md py-[15px]'>
+      <div className='w-full h-full flex justify-between shadow-md p-[15px]'>
+        <img src={logo} className='w-[200px]' alt='logo'/>
         <ul className='flex items-center w-full justify-end gap-20 max-xl:gap-10 max-lg:gap-5 pr-[30px]'>
           <Link to={linkTo}>
             <li

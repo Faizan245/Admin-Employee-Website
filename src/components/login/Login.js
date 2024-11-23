@@ -4,13 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { login } from '../../store/authSlice';
 import axios from 'axios';
-
+const api = process.env.REACT_APP_API_ENDPOINT;
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const api = process.env.REACT_APP_API_ENDPOINT;
+  
 
   const dispatch = useDispatch();
   const navigate = useNavigate();

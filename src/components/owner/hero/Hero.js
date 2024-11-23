@@ -25,7 +25,7 @@ function Hero() {
         const fetchTasks = async () => {
             try {
                 const response = await axios.get(`${api}/tasks`);
-                setTasks(response.data);
+                setTasks(response.data.tasks);
             } catch (error) {
                 console.error('Error fetching tasks:', error);
             }
@@ -33,7 +33,7 @@ function Hero() {
 
         fetchTasks();
         setRefreshTasks(false)
-    }, [refreshTasks]);
+    }, [refreshTasks, api]);
 
     const handleCreateEmpClick = () => {
         setShowPopUpReg(true);
@@ -70,8 +70,9 @@ function Hero() {
         setTaskDetails(task.taskDetails);
         setStatus(task.status);
         setNewStatus(task.status);
-        setTaskId(task.id)
-        setDocuments(task.documentUrls);
+        setTaskId(task.taskId)
+        setDocuments(Array.isArray(task.documentURLs) ? task.documentURLs : []);
+        console.log(task.documentURLs)
     }
 
 
@@ -91,18 +92,16 @@ function Hero() {
     const handleSave = async () => {
 
         const formData = new FormData();
-        formData.append('status', newStatus);
+        formData.append('newStatus', newStatus);
         formData.append('taskId', taskId);
-        if (files != null) {
-            files.forEach((document, index) => {
-                formData.append('files', document);
-            });
-        }
+        documents.forEach((document) => {
+            formData.append('files', document);
+          });
+        console.log('FormData entries:', [...formData.entries()]);
 
         try {
-            const response = await axios.post(`${api}/updateTask`, formData, {
-                'Content-Type': 'multipart/form-data'
-            });
+            const response = await axios.post(`${api}/updateTask`, formData);
+
 
             if (response.status === 200) {
                 console.log('Task updated successfully:', response.data);
@@ -148,7 +147,7 @@ function Hero() {
                         <div key={index} className="w-[400px] flex gap-5 rounded-[40px] max-xl:rounded-[20px] shadow-2xl p-[30px] max-xl:p-[20px]">
                             <div className='w-[100px] h-[100px] max-xl:w-[80px] max-xl:h-[80px] rounded-xl bg-[#C4C4C4]'></div>
                             <div className='flex flex-col gap-2 max-xl:gap-1'>
-                                <h1 className='font-semibold text-[20px] max-xl:text-[18px]'>Employee : {task.employeeName}</h1>
+                                <h1 className='font-semibold text-[20px] max-xl:text-[18px]'>{task.employeeName}</h1>
                                 <p className='text-[18px] max-xl:text-[16px] text-[#C4C4C4]'>Task : {task.taskDetails}</p>
                                 <div className='flex gap-3'>
                                     <button onClick={() => handleDetailsClick(task)} className='bg-custom-gradient px-[20px] py-[2px] text-[#fff] text-[14px] rounded-lg'>detail</button>
@@ -165,20 +164,25 @@ function Hero() {
                                                         <h1><span className='font-bold'>Task Details : </span>{taskDetails}</h1>
                                                         <h1><span className='font-bold'>Task Status : </span>{currentIndex === -1 ? status : statusStage[currentIndex]}</h1>
                                                         <div className='flex flex-col px-[10px] h-[300px] overflow-scroll'>
-                                                            {documents.length > 0 ? (
-                                                                documents.map((doc, index) => (
-                                                                    <div
-                                                                        key={index}
-                                                                        onClick={() => handleDocClick(doc.url)}
-                                                                        className='cursor-pointer rounded-2xl p-[20px] bg-[#fff] border border-[#ccc] mb-[10px] inline-block'
-                                                                    >
-                                                                        {doc.name}
-                                                                    </div>
-                                                                ))
+                                                            {Array.isArray(documents) && documents.length > 0 ? (
+                                                                documents.map((doc, index) => {
+                                                                    // Extract the file name from the URL
+                                                                    const fileName = doc.split('/').pop();
+                                                                    return (
+                                                                        <div
+                                                                            key={index}
+                                                                            onClick={() => handleDocClick(doc)} // Pass the URL directly
+                                                                            className='cursor-pointer rounded-2xl p-[20px] bg-[#fff] border border-[#ccc] mb-[10px] inline-block'
+                                                                        >
+                                                                            {fileName} {/* Display only the file name */}
+                                                                        </div>
+                                                                    );
+                                                                })
                                                             ) : (
                                                                 <p>Loading documents...</p>
                                                             )}
                                                         </div>
+
                                                         <label className="inline-block bg-[#D9D9D9] text-black text-[18px] max-md:text-[16px] font-medium py-2 px-4 rounded-xl cursor-pointer">
                                                             Pick Documents
                                                             <input
