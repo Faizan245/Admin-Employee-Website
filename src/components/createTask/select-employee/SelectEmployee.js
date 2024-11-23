@@ -15,6 +15,7 @@ function SelectEmployee() {
     const [errorMessage, setErrorMessage] = useState('');
     const navigate = useNavigate();
     const api = process.env.REACT_APP_API_ENDPOINT;
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         const fetchEmployees = async () => {
@@ -36,7 +37,7 @@ function SelectEmployee() {
     const dispatch = useDispatch();
 
     const handleClosePopup = () => {
-        setShowPopup(false);        
+        setShowPopup(false);
         navigate('/owner');
     };
 
@@ -48,7 +49,8 @@ function SelectEmployee() {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        
+        setIsLoading(true);
+
         const formData = new FormData();
         formData.append('employeeName', employeeName);
         formData.append('employeeId', employeeId);
@@ -56,8 +58,8 @@ function SelectEmployee() {
         formData.append('status', taskStatus);
         documents.forEach((document) => {
             formData.append('files', document);
-          });
-        
+        });
+
 
         try {
             const response = await fetch(`${api}/assignTask`, {
@@ -79,6 +81,8 @@ function SelectEmployee() {
         } catch (error) {
             console.error('Error:', error);
             setErrorMessage('An error occurred. Please try again.');
+        } finally {
+            setIsLoading(false); // Set button back to "Login" after API call ends
         }
     };
 
@@ -101,7 +105,9 @@ function SelectEmployee() {
                             ))}
                         </div>
                         <div className='w-[350px] max-lg:w-[200px] text-center py-[10px] rounded-xl font-bold text-[20px] max-lg:text-[16px] bg-custom-gradient'>
-                            <button type='submit'>Create Task</button>
+                            <button type='submit' disabled={isLoading}>
+                                {isLoading ? 'Creating Task...' : 'Create Task'}
+                            </button>
                         </div>
                         {errorMessage && <p className="text-red-500">{errorMessage}</p>}
                         {showPopup && (

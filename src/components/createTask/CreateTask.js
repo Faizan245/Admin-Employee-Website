@@ -9,25 +9,28 @@ const CreateTask = () => {
   const [documents, setDocuments] = useState([]);
   const [uploadMessage, setUploadMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setIsLoading(true);
     if (!taskTitle || !taskStatus || documents.length === 0) {
       setErrorMessage('Please fill out all fields and upload at least one document.');
       return;
     }
-    
+
     const newTask = {
       taskTitle,
       taskStatus,
       documents,
     };
     console.log(newTask)
-    
+
     dispatch(addTask(newTask));
     navigate('/select-employee');
+    setIsLoading(false);
 
     // Clear the form after submission
     setTaskTitle('');
@@ -88,7 +91,9 @@ const CreateTask = () => {
           </div>
         )}
         <div className='w-[400px] max-xl:w-[300px] max-md:w-[250px] bg-custom-gradient text-center py-[10px] rounded-xl text-[20px] max-md:text-[16px] font-bold'>
-          <button type="submit">Next</button>
+          <button type="submit" disabled={isLoading}>
+            {isLoading ? 'Please wait...' : 'Next'}
+          </button>
         </div>
       </form>
     </div>

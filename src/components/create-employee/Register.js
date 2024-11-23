@@ -15,7 +15,8 @@ function Register() {
     const [designation, setDesignation] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
-    const [copyMessage, setCopyMessage] = useState(''); // New state for copy message
+    const [copyMessage, setCopyMessage] = useState('');
+    const [isLoading, setIsLoading] = useState(false); // New state for copy message
 
     const api = process.env.REACT_APP_API_ENDPOINT;
 
@@ -43,18 +44,19 @@ function Register() {
     };
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
+        setIsLoading(true);
+
         // Basic validation
         if (!name || !email || !photo || !password || !gender || !status || !designation) {
             setErrorMessage('Please fill out all fields and upload a valid document.');
             return;
         }
-    
+
         if (!(photo instanceof File)) {
             setErrorMessage('Please upload a valid image file.');
             return;
         }
-    
+
         const formData = new FormData();
         formData.append('username', name);
         formData.append('email', email);
@@ -63,22 +65,22 @@ function Register() {
         formData.append('gender', gender);
         formData.append('status', status);
         formData.append('designation', designation);
-    
+
         console.log('FormData entries:', [...formData.entries()]);
-    
+
         try {
             const response = await fetch(`${api}/register`, {
                 method: 'POST',
                 body: formData,
             });
-    
+
             if (response.ok) {
                 const data = await response.json();
                 console.log('Registration successful:', data);
-    
+
                 setSuccessMessage('Employee registered successfully !!');
                 setErrorMessage('');
-                
+
                 // Reset form fields
                 setName('');
                 setEmail('');
@@ -96,9 +98,11 @@ function Register() {
         } catch (error) {
             console.error('Error:', error);
             setErrorMessage('An error occurred. Please try again.');
+        } finally {
+            setIsLoading(false); // Set button back to "Login" after API call ends
         }
     };
-    
+
 
 
     return (
@@ -195,7 +199,9 @@ function Register() {
                         </div>
                     )}
                     <div className='text-center py-[10px] rounded-xl bg-custom-gradient font-medium'>
-                        <button type='submit' className='text-[18px]'>Register</button>
+                        <button type='submit' className='text-[18px]' disabled={isLoading}>
+                            {isLoading ? 'Please wait...' : 'Register'}
+                        </button>
                     </div>
                     {successMessage && (
                         <div className="text-[#30800B] text-center">
